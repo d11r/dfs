@@ -20,6 +20,7 @@ router.delete("/file", ClientController.deleteFile);
 
 // routes for directories
 router.get("/ls", ClientController.openDirectory);
+router.get("/dir", ClientController.readDirectory);
 router.post("/mkdir", ClientController.makeDirectory);
 router.delete("/dir", ClientController.deleteDirectory);
 
