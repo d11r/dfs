@@ -15,6 +15,6 @@ APP_HOST=localhost
 APP_PORT=4000
 ```
 
-First, for installation of dependencies, run: `yarn`
+Secondly, for installation of dependencies, run: `yarn`
 
-Secondly, to start the web server, run: `yarn start`
+Then, to start the web server, run: `yarn start`
