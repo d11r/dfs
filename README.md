@@ -19,6 +19,8 @@ Secondly, for installation of dependencies, run: `yarn`
 
 Then, to start the web server, run: `yarn start`
 
+After doing so, when that everything is working by sending a GET request to `http://localhost:4000/api/ping`. You should receive a `pong` message. Note that the host (localhost), and the port (400) could change depending on your environment file.
+
 ## Description
 
 The system consists of two types of entities:
