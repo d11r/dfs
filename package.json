@@ -1,5 +1,5 @@
 {
-  "name": "dfs - distributed file system",
+  "name": "dfs",
   "version": "0.0.1",
   "description": "course project for distributed systems",
   "main": "index.js",
