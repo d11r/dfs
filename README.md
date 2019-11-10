@@ -18,3 +18,44 @@ APP_PORT=4000
 Secondly, for installation of dependencies, run: `yarn`
 
 Then, to start the web server, run: `yarn start`
+
+## Description
+
+The system consists of two types of entities:
+
+- Naming server
+- Storage servers
+
+### Naming server
+
+Naming server is a server that is responsible for indexing the files, and indicating while file is stored in which storage server. It communicates with the client, i.e. it should handle various user requests. These requests will be described below. The naming server should then redirect the request to the responsible storage server that's hosting the file.
+
+Naming server should track the entire file system of all storage servers. It should associate every file in the FS to the corresponding storage server. It acts as a proxy from client to storage servers.
+
+It should also allow storage servers to register their presence.
+
+### Storage servers
+
+They should provide clients with access to file data. Also, storage servers should respond to redirects from naming server.
+
+## Functionality
+
+File system's users should be able to perform these operations on files:
+
+- read files
+- write files
+- delete files
+- copy files
+- move files
+- get info about files
+
+And these on directories:
+
+- listing
+- creation
+- changing
+- deletion
+
+## Additional Requirements
+
+All of these files operations should be replicated on multiple storage servers. DFS will be fault-tolerant, i.e. data will be accessible even if some of the network nodes are offline.
