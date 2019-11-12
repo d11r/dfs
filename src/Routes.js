@@ -27,7 +27,11 @@ router.post("/filemove", ClientController.moveFile);
 
 router.delete(
   "/file",
-  [Middleware.validateName, Middleware.validatePath],
+  [
+    Middleware.validateName,
+    Middleware.validatePath,
+    Middleware.validateDirectory
+  ],
   ClientController.deleteFile
 );
 

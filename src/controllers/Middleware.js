@@ -1,3 +1,7 @@
+import Directory from "../models/Directory.model";
+import File from "../models/File.model";
+import Storage from "../models/Storage.model";
+
 import utils from "../config/utils";
 
 const validateName = (req, res, next) => {
@@ -25,7 +29,21 @@ const validatePath = (req, res, next) => {
   }
 };
 
+const validateDirectory = async (req, res, next) => {
+  const directory = await Directory.findOne({ path: req.body.path });
+  if (!directory) {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "directory with specified path does not exist"
+    });
+  } else {
+    next();
+  }
+};
+
 export default {
   validateName,
-  validatePath
+  validatePath,
+  validateDirectory
 };

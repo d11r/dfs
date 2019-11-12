@@ -84,17 +84,6 @@ const writeFile = (req, res, next) => {
 };
 
 const deleteFile = async (req, res, next) => {
-  const directory = await Directory.findOne({ path: req.body.path });
-
-  if (!directory) {
-    res.status(400);
-    res.send({
-      success: false,
-      message: "directory with specified path does not exist"
-    });
-    return;
-  }
-
   const file = await File.findOne({
     name: req.body.name
   }).populate({
