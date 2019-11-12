@@ -234,8 +234,19 @@ const makeDirectory = async (req, res, next) => {
   next();
 };
 
-const deleteDirectory = (req, res, next) => {
-  res.send("todo: delete dir");
+const deleteDirectory = async (req, res, next) => {
+  const directory = await Directory.findOne({ path: req.body.path });
+  // delete all the contents of the directory
+  directory.files.forEach(async f => {
+    const file = await File.findById(f);
+    await file.remove();
+  });
+
+  // also delete the directory itself
+  await directory.remove();
+
+  res.send({ success: true });
+
   next();
 };
 

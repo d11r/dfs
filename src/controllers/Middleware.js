@@ -87,11 +87,25 @@ const validateFile = async (req, res, next) => {
   }
 };
 
+const requireForce = async (req, res, next) => {
+  if (req.body.force) {
+    next();
+  } else {
+    res.status(403);
+    res.send({
+      success: false,
+      message:
+        "in order to perform this action you need to specify 'force' field, set it to true"
+    });
+  }
+};
+
 export default {
   validateName,
   validatePath,
   validateDirectory,
   validateFile,
   validateNewPath,
-  validateDirectoryDoesntExist
+  validateDirectoryDoesntExist,
+  requireForce
 };
