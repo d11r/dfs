@@ -4,6 +4,8 @@ import Directory from "../models/Directory.model";
 import File from "../models/File.model";
 import Storage from "../models/Storage.model";
 
+import { isValidPath } from "../config/utils";
+
 const pong = (req, res, next) => {
   res.send("pong");
   next();
@@ -27,6 +29,22 @@ const initialize = async (req, res, next) => {
 };
 
 const createEmptyFile = async (req, res, next) => {
+  if (!req.body.name) {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "no name specified, be sure to include name in request body"
+    });
+  }
+
+  if (!isValidPath(req.body.path)) {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "given path is invalid, must start and end with '/'"
+    });
+  }
+
   const directory = await Directory.findOne({ path: req.body.path });
   let newDirectory;
 
@@ -46,11 +64,15 @@ const createEmptyFile = async (req, res, next) => {
   });
 
   const savedFile = await newFile.save();
-  res.send({
-    success: true,
-    path: req.body.path,
-    newFile: savedFile
-  });
+  if (savedFile) {
+    res.send({
+      success: true,
+      path: req.body.path,
+      newFile: savedFile
+    });
+  } else {
+  }
+
   next();
 };
 
