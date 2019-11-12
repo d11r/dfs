@@ -1,4 +1,4 @@
-# dfs - Distributed File System
+# dfs - Naming Server - Distributed File System
 
 This is a course project of the Distributed System course at Innopolis University.
 
@@ -15,6 +15,8 @@ APP_HOST=localhost
 APP_PORT=4000
 ```
 
+Alternatively, specify `DB_PROD_PATH` that equals to the URL of mLab cloud-hosted mongodb.
+
 Secondly, for installation of dependencies, run: `yarn`
 
 Then, to start the web server, run: `yarn start`
@@ -25,7 +27,7 @@ After doing so, when that everything is working by sending a GET request to `htt
 
 The system consists of two types of entities:
 
-- Naming server
+- Naming server (this repo)
 - Storage servers
 
 ### Naming server
