@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import Directory from "../models/Directory.model";
 import File from "../models/File.model";
 import Storage from "../models/Storage.model";
@@ -24,8 +26,31 @@ const initialize = async (req, res, next) => {
   next();
 };
 
-const createEmptyFile = (req, res, next) => {
-  res.send("todo: create empty file");
+const createEmptyFile = async (req, res, next) => {
+  const directory = await Directory.findOne({ path: req.body.path });
+  let newDirectory;
+
+  if (!directory) {
+    newDirectory = new Directory({
+      path: req.body.path,
+      files: []
+    });
+    await newDirectory.save();
+  }
+
+  const newFile = new File({
+    name: req.body.name,
+    hash: _.repeat("0", 64),
+    directory: directory ? directory.id : newDirectory.id,
+    storages: []
+  });
+
+  const savedFile = await newFile.save();
+  res.send({
+    success: true,
+    path: req.body.path,
+    newFile: savedFile
+  });
   next();
 };
 
