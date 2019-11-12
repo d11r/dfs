@@ -14,7 +14,16 @@ router.post("/init", ClientController.initialize);
 
 // routes for files
 router.get("/file", ClientController.readFile);
-router.get("/fileinfo", ClientController.getFileInfo);
+router.get(
+  "/fileinfo",
+  [
+    Middleware.validateName,
+    Middleware.validatePath,
+    Middleware.validateDirectory,
+    Middleware.validateFile
+  ],
+  ClientController.getFileInfo
+);
 
 router.post(
   "/touch",

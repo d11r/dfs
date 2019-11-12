@@ -87,6 +87,7 @@ const deleteFile = async (req, res, next) => {
   const file = await File.findOne({
     name: req.body.name
   }).populate({
+    path: "directories",
     match: { path: req.body.path }
   });
 
@@ -95,8 +96,25 @@ const deleteFile = async (req, res, next) => {
   next();
 };
 
-const getFileInfo = (req, res, next) => {
-  res.send("todo: get file info");
+const getFileInfo = async (req, res, next) => {
+  const file = await File.findOne({
+    name: req.body.name
+  }).populate({
+    path: "directories",
+    match: { path: req.body.path }
+  });
+
+  res.send({
+    success: true,
+    metadata: {
+      name: file.name,
+      path: req.body.path,
+      createdAt: file.createdAt,
+      updatedAt: file.updatedAt,
+      ...file.metadata
+    }
+  });
+
   next();
 };
 
