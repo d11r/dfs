@@ -4,7 +4,7 @@ import Directory from "../models/Directory.model";
 import File from "../models/File.model";
 import Storage from "../models/Storage.model";
 
-import { isValidPath } from "../config/utils";
+import utils from "../config/utils";
 
 const pong = (req, res, next) => {
   res.send("pong");
@@ -37,7 +37,7 @@ const createEmptyFile = async (req, res, next) => {
     });
   }
 
-  if (!isValidPath(req.body.path)) {
+  if (!utils.isValidPath(req.body.path)) {
     res.status(400);
     res.send({
       success: false,
