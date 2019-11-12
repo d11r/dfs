@@ -68,8 +68,12 @@ router.post("/file", ClientController.writeFile);
 router.get("/file", ClientController.readFile);
 
 // routes for directories
-router.get("/ls", ClientController.openDirectory);
-router.get("/dir", ClientController.readDirectory);
+router.get(
+  "/ls",
+  [Middleware.validatePath, Middleware.validateDirectory],
+  ClientController.readDirectory
+);
+router.get("/dir", ClientController.openDirectory);
 router.post("/mkdir", ClientController.makeDirectory);
 router.delete("/dir", ClientController.deleteDirectory);
 

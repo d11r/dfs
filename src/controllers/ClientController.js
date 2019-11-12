@@ -198,13 +198,24 @@ const moveFile = async (req, res, next) => {
   next();
 };
 
+// TODO: peter, what do we do here?
 const openDirectory = (req, res, next) => {
   res.send("todo: open directory (cd)");
   next();
 };
 
-const readDirectory = (req, res, next) => {
-  res.send("todo: return list of files stored in directory");
+const readDirectory = async (req, res, next) => {
+  const directory = await Directory.findOne({ path: req.body.path }).populate(
+    "files"
+  );
+
+  res.send({
+    success: true,
+    files: directory.files,
+    id: directory.id,
+    path: directory.path
+  });
+
   next();
 };
 
