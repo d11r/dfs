@@ -42,8 +42,28 @@ const validateDirectory = async (req, res, next) => {
   }
 };
 
+const validateFile = async (req, res, next) => {
+  const file = await File.findOne({
+    name: req.body.name
+  }).populate({
+    path: "directories",
+    match: { path: req.body.path }
+  });
+
+  if (!file) {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "file with specified name on the specified path does not exist"
+    });
+  } else {
+    next();
+  }
+};
+
 export default {
   validateName,
   validatePath,
-  validateDirectory
+  validateDirectory,
+  validateFile
 };

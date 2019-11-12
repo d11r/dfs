@@ -87,18 +87,8 @@ const deleteFile = async (req, res, next) => {
   const file = await File.findOne({
     name: req.body.name
   }).populate({
-    path: "directories",
     match: { path: req.body.path }
   });
-
-  if (!file) {
-    res.status(400);
-    res.send({
-      success: false,
-      message: "file with specified name on the specified path does not exist"
-    });
-    return;
-  }
 
   await file.remove();
   res.send({ success: true });

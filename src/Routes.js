@@ -30,7 +30,8 @@ router.delete(
   [
     Middleware.validateName,
     Middleware.validatePath,
-    Middleware.validateDirectory
+    Middleware.validateDirectory,
+    Middleware.validateFile
   ],
   ClientController.deleteFile
 );
