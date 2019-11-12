@@ -13,7 +13,6 @@ router.get("/ping", ClientController.pong);
 router.post("/init", ClientController.initialize);
 
 // routes for files
-router.get("/file", ClientController.readFile);
 router.get(
   "/fileinfo",
   [
@@ -27,11 +26,20 @@ router.get(
 
 router.post(
   "/touch",
+  // not validating directory because we can create on-the-fly
   [Middleware.validateName, Middleware.validatePath],
   ClientController.createEmptyFile
 );
-router.post("/file", ClientController.writeFile);
-router.post("/filecopy", ClientController.copyFile);
+router.post(
+  "/filecopy",
+  [
+    Middleware.validateName,
+    Middleware.validatePath,
+    Middleware.validateDirectory,
+    Middleware.validateFile
+  ],
+  ClientController.copyFile
+);
 router.post("/filemove", ClientController.moveFile);
 
 router.delete(
@@ -44,6 +52,10 @@ router.delete(
   ],
   ClientController.deleteFile
 );
+
+// files with communication with storage servers
+router.post("/file", ClientController.writeFile);
+router.get("/file", ClientController.readFile);
 
 // routes for directories
 router.get("/ls", ClientController.openDirectory);

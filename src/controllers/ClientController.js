@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import _ from "lodash";
 import Mongoose from "mongoose";
 
@@ -41,7 +42,6 @@ const createEmptyFile = async (req, res, next) => {
 
   const newFile = new File({
     name: req.body.name,
-    hash: _.repeat("0", 64), // 00000... (64 times)
     directory: directory ? directory.id : newDirectory.id, // if such directory doesnt exist, create new
     storages: [] // don't store empty files on storage servers
   });
@@ -94,7 +94,7 @@ const deleteFile = async (req, res, next) => {
   });
 
   const directory = await Directory.findOne({ path: req.body.path });
-  directory.files.splice(directory.files.indexOf(file.id), 1);
+  directory.files = directory.files.filter(f => f != file.id);
   await directory.save();
 
   await file.remove();
@@ -124,8 +124,31 @@ const getFileInfo = async (req, res, next) => {
   next();
 };
 
-const copyFile = (req, res, next) => {
-  res.send("todo: copy file");
+const copyFile = async (req, res, next) => {
+  const file = await File.findOne({
+    name: req.body.name
+  });
+
+  const directory = await Directory.findOne({ path: req.body.path });
+
+  const newFile = new File({
+    ...file,
+    name: `${file.name}-${_.random(0, 100000)}`,
+    isNew: true,
+    _id: Mongoose.Types.ObjectId()
+  });
+
+  const savedFile = await newFile.save();
+
+  directory.files.push(savedFile.id);
+  await directory.save();
+
+  res.send({
+    success: true,
+    path: req.body.path,
+    newFile: savedFile
+  });
+
   next();
 };
 
