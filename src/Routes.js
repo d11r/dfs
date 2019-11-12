@@ -40,7 +40,17 @@ router.post(
   ],
   ClientController.copyFile
 );
-router.post("/filemove", ClientController.moveFile);
+router.post(
+  "/filemove",
+  [
+    Middleware.validateName,
+    Middleware.validatePath,
+    Middleware.validateNewPath,
+    Middleware.validateDirectory,
+    Middleware.validateFile
+  ],
+  ClientController.moveFile
+);
 
 router.delete(
   "/file",

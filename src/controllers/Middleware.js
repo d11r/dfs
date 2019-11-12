@@ -29,6 +29,19 @@ const validatePath = (req, res, next) => {
   }
 };
 
+const validateNewPath = (req, res, next) => {
+  if (!req.body.newPath || !utils.isValidPath(req.body.newPath)) {
+    res.status(400);
+    res.send({
+      success: false,
+      message:
+        "given newPath is invalid or not specified, must start and end with '/'"
+    });
+  } else {
+    next();
+  }
+};
+
 const validateDirectory = async (req, res, next) => {
   const directory = await Directory.findOne({ path: req.body.path });
   if (!directory) {
@@ -65,5 +78,6 @@ export default {
   validateName,
   validatePath,
   validateDirectory,
-  validateFile
+  validateFile,
+  validateNewPath
 };

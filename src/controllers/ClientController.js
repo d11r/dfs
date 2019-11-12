@@ -152,8 +152,49 @@ const copyFile = async (req, res, next) => {
   next();
 };
 
-const moveFile = (req, res, next) => {
-  res.send("todo: move file");
+const moveFile = async (req, res, next) => {
+  const file = await File.findOne({
+    name: req.body.name
+  });
+
+  // remove from last folder
+  const oldDir = await Directory.findOne({ path: req.body.path });
+  oldDir.files = oldDir.files.filter(f => f != file.id);
+  await oldDir.save();
+
+  const directory = await Directory.findOne({ path: req.body.newPath });
+  let newDirectory;
+  let newFile;
+
+  // add to new folder
+  // if there is such a folder, put in there
+  // if not, make new folder
+  if (!directory) {
+    newDirectory = new Directory({
+      path: req.body.newPath,
+      files: []
+    });
+    const newDir = await newDirectory.save();
+    file.directory = newDir.id;
+    const newF = await file.save();
+    newDir.files.push(newF.id);
+    newFile = newF;
+    await newDir.save();
+  } else {
+    file.directory = directory.id;
+    const newF = await file.save();
+    newFile = newF;
+    directory.files.push(newF.id);
+    await directory.save();
+  }
+
+  res.send({
+    success: true,
+    path: req.body.path,
+    newPath: req.body.newPath,
+    newFile
+  });
+
   next();
 };
 
