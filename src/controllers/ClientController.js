@@ -1,10 +1,26 @@
+import Directory from "../models/Directory.model";
+import File from "../models/File.model";
+import Storage from "../models/Storage.model";
+
 const pong = (req, res, next) => {
   res.send("pong");
   next();
 };
 
-const initialize = (req, res, next) => {
-  res.send("todo: initialize");
+const initialize = async (req, res, next) => {
+  await Directory.deleteMany({});
+  await File.deleteMany({});
+
+  const root = new Directory({
+    path: "/",
+    files: []
+  });
+
+  await root.save();
+  res.send({
+    success: true,
+    root: "/"
+  });
   next();
 };
 

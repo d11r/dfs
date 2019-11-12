@@ -8,11 +8,13 @@ const router = Express.Router();
 // ping/pong response from server
 router.get("/ping", ClientController.pong);
 
+// initialize
+router.post("/init", ClientController.initialize);
+
 // routes for files
 router.get("/file", ClientController.readFile);
 router.get("/fileinfo", ClientController.getFileInfo);
 
-router.post("/init", ClientController.initialize);
 router.post("/touch", ClientController.createEmptyFile);
 router.post("/file", ClientController.writeFile);
 router.post("/filecopy", ClientController.copyFile);
