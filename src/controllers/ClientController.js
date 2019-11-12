@@ -71,6 +71,10 @@ const createEmptyFile = async (req, res, next) => {
       newFile: savedFile
     });
   } else {
+    res.send({
+      success: false,
+      message: "unknown error happened"
+    });
   }
 
   next();
