@@ -25,7 +25,11 @@ router.post("/file", ClientController.writeFile);
 router.post("/filecopy", ClientController.copyFile);
 router.post("/filemove", ClientController.moveFile);
 
-router.delete("/file", ClientController.deleteFile);
+router.delete(
+  "/file",
+  [Middleware.validateName, Middleware.validatePath],
+  ClientController.deleteFile
+);
 
 // routes for directories
 router.get("/ls", ClientController.openDirectory);

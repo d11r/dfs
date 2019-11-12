@@ -6,8 +6,8 @@ const FileSchema = new Schema({
   name: { type: String, required: true, max: 100, trim: true },
   hash: { type: String, required: true, maxlength: 64, minlength: 64 },
   metadata: { type: String },
-  directory: Schema.Types.ObjectId,
-  storages: [Schema.Types.ObjectId]
+  directory: { type: Schema.Types.ObjectId, ref: "Directory" },
+  storages: [{ type: Schema.Types.ObjectId, ref: "Storage" }]
 });
 
 export default Mongoose.model("File", FileSchema);
