@@ -1,6 +1,7 @@
 import Express from "express";
 
 import ClientController from "./controllers/ClientController";
+import StorageController from "./controllers/StorageController";
 
 const router = Express.Router();
 
@@ -23,5 +24,8 @@ router.get("/ls", ClientController.openDirectory);
 router.get("/dir", ClientController.readDirectory);
 router.post("/mkdir", ClientController.makeDirectory);
 router.delete("/dir", ClientController.deleteDirectory);
+
+// routes for storage servers
+router.post("/register", StorageController.register);
 
 export default router;
