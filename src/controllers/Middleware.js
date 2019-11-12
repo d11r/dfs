@@ -55,6 +55,19 @@ const validateDirectory = async (req, res, next) => {
   }
 };
 
+const validateDirectoryDoesntExist = async (req, res, next) => {
+  const directory = await Directory.findOne({ path: req.body.path });
+  if (directory) {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "directory with specified path already exists"
+    });
+  } else {
+    next();
+  }
+};
+
 const validateFile = async (req, res, next) => {
   const file = await File.findOne({
     name: req.body.name
@@ -79,5 +92,6 @@ export default {
   validatePath,
   validateDirectory,
   validateFile,
-  validateNewPath
+  validateNewPath,
+  validateDirectoryDoesntExist
 };

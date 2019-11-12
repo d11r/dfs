@@ -219,8 +219,18 @@ const readDirectory = async (req, res, next) => {
   next();
 };
 
-const makeDirectory = (req, res, next) => {
-  res.send("todo: mkdir");
+const makeDirectory = async (req, res, next) => {
+  const directory = new Directory({
+    path: req.body.path,
+    files: []
+  });
+  await directory.save();
+
+  res.send({
+    success: true,
+    path: req.body.path
+  });
+
   next();
 };
 

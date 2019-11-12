@@ -74,7 +74,11 @@ router.get(
   ClientController.readDirectory
 );
 router.get("/dir", ClientController.openDirectory);
-router.post("/mkdir", ClientController.makeDirectory);
+router.post(
+  "/mkdir",
+  [Middleware.validatePath, Middleware.validateDirectoryDoesntExist],
+  ClientController.makeDirectory
+);
 router.delete("/dir", ClientController.deleteDirectory);
 
 // routes for storage servers
