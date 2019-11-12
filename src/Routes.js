@@ -2,6 +2,7 @@ import Express from "express";
 
 import ClientController from "./controllers/ClientController";
 import StorageController from "./controllers/StorageController";
+import Middleware from "./controllers/Middleware";
 
 const router = Express.Router();
 
@@ -15,7 +16,11 @@ router.post("/init", ClientController.initialize);
 router.get("/file", ClientController.readFile);
 router.get("/fileinfo", ClientController.getFileInfo);
 
-router.post("/touch", ClientController.createEmptyFile);
+router.post(
+  "/touch",
+  [Middleware.validateName, Middleware.validatePath],
+  ClientController.createEmptyFile
+);
 router.post("/file", ClientController.writeFile);
 router.post("/filecopy", ClientController.copyFile);
 router.post("/filemove", ClientController.moveFile);
