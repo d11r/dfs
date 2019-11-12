@@ -1,4 +1,5 @@
 import _ from "lodash";
+import Mongoose from "mongoose";
 
 import Directory from "../models/Directory.model";
 import File from "../models/File.model";
@@ -51,10 +52,11 @@ const createEmptyFile = async (req, res, next) => {
     // save file also to directory's list of files
     if (directory) {
       directory.files.push(savedFile.id);
+      await directory.save();
     } else {
-      directory.files.push(savedFile.id);
+      newDirectory.files.push(savedFile.id);
+      await newDirectory.save();
     }
-    await directory.save();
 
     res.send({
       success: true,
@@ -90,6 +92,10 @@ const deleteFile = async (req, res, next) => {
     path: "directories",
     match: { path: req.body.path }
   });
+
+  const directory = await Directory.findOne({ path: req.body.path });
+  directory.files.splice(directory.files.indexOf(file.id), 1);
+  await directory.save();
 
   await file.remove();
   res.send({ success: true });
