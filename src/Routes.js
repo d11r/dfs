@@ -5,6 +5,7 @@ import StorageController from "./controllers/StorageController";
 
 const router = Express.Router();
 
+// ping/pong response from server
 router.get("/ping", ClientController.pong);
 
 // routes for files

@@ -27,7 +27,10 @@ const setup = () => {
 
 const connect = async () => {
   Mongoose.connect(
-    `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+    // for production db, use:
+    process.env.DB_PROD_PATH,
+    // for local db, use:
+    // `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
