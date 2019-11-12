@@ -40,13 +40,22 @@ const createEmptyFile = async (req, res, next) => {
 
   const newFile = new File({
     name: req.body.name,
-    hash: _.repeat("0", 64),
-    directory: directory ? directory.id : newDirectory.id,
-    storages: []
+    hash: _.repeat("0", 64), // 00000... (64 times)
+    directory: directory ? directory.id : newDirectory.id, // if such directory doesnt exist, create new
+    storages: [] // don't store empty files on storage servers
   });
 
   const savedFile = await newFile.save();
+
   if (savedFile) {
+    // save file also to directory's list of files
+    if (directory) {
+      directory.files.push(savedFile.id);
+    } else {
+      directory.files.push(savedFile.id);
+    }
+    await directory.save();
+
     res.send({
       success: true,
       path: req.body.path,
@@ -62,11 +71,13 @@ const createEmptyFile = async (req, res, next) => {
   next();
 };
 
+// TODO: @peter, communicate with vlad how to do it
 const readFile = (req, res, next) => {
   res.send("todo: read file");
   next();
 };
 
+// TODO: @peter, communicate with vlad how to do it
 const writeFile = (req, res, next) => {
   res.send("todo: write file");
   next();
