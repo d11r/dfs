@@ -80,7 +80,50 @@ const readFile = (req, res, next) => {
 };
 
 const writeFile = async (req, res, next) => {
-  // redirect to one of the storage servers
+  // create file
+  const directory = await Directory.findOne({ path: req.body.path });
+  let newDirectory;
+
+  if (!directory) {
+    newDirectory = new Directory({
+      path: req.body.path,
+      files: []
+    });
+    await newDirectory.save();
+  }
+
+  const newFile = new File({
+    name: req.body.name,
+    hash: req.body.hash,
+    directory: directory ? directory.id : newDirectory.id, // if such directory doesnt exist, create new
+    storages: []
+  });
+
+  const savedFile = await newFile.save();
+
+  if (savedFile) {
+    if (directory) {
+      directory.files.push(savedFile.id);
+      await directory.save();
+    } else {
+      newDirectory.files.push(savedFile.id);
+      await newDirectory.save();
+    }
+    res.send({
+      success: true,
+      message: "ok, now send the file using /api/upload"
+    });
+  } else {
+    res.send({
+      success: false,
+      message: "unknown error happened"
+    });
+  }
+
+  next();
+};
+
+const uploadFile = async (req, res, next) => {
   const ss = await Storage.findOne({});
   res.redirect(307, `http://${ss.ip}:${ss.port}/api/upload`);
   next();
@@ -264,5 +307,6 @@ export default {
   openDirectory,
   readDirectory,
   makeDirectory,
-  deleteDirectory
+  deleteDirectory,
+  uploadFile
 };

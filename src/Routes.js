@@ -9,6 +9,9 @@ const router = Express.Router();
 // ping/pong response from server
 router.get("/ping", ClientController.pong);
 
+// replication
+router.post("/sync", StorageController.sync);
+
 // initialize
 router.post("/init", ClientController.initialize);
 
@@ -64,7 +67,11 @@ router.delete(
 );
 
 // files with communication with storage servers
-router.post("/file", ClientController.writeFile);
+router.post(
+  "/file",
+  [Middleware.validatePath, Middleware.validateHash],
+  ClientController.writeFile
+);
 router.get("/file", ClientController.readFile);
 
 // routes for directories
@@ -97,5 +104,7 @@ router.post(
   [Middleware.validateStorage],
   StorageController.register
 );
+
+router.post("/upload", ClientController.uploadFile);
 
 export default router;

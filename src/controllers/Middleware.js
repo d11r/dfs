@@ -1,6 +1,5 @@
 import Directory from "../models/Directory.model";
 import File from "../models/File.model";
-import Storage from "../models/Storage.model";
 
 import utils from "../config/utils";
 
@@ -100,6 +99,19 @@ const requireForce = async (req, res, next) => {
   }
 };
 
+const validateHash = async (req, res, next) => {
+  if (req.body.hash) {
+    next();
+  } else {
+    res.status(400);
+    res.send({
+      success: false,
+      message:
+        "in order to perform this action you need to specify 'hash' field"
+    });
+  }
+};
+
 const validateStorage = (req, res, next) => {
   if (!req.body.address) {
     res.status(400);
@@ -132,5 +144,6 @@ export default {
   validateNewPath,
   validateDirectoryDoesntExist,
   requireForce,
-  validateStorage
+  validateStorage,
+  validateHash
 };
