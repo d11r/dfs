@@ -100,6 +100,30 @@ const requireForce = async (req, res, next) => {
   }
 };
 
+const validateStorage = (req, res, next) => {
+  if (!req.body.address) {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "no ip address specified"
+    });
+  } else if (!req.body.port) {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "no port specified"
+    });
+  } else if (!req.body.name) {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "no name specified"
+    });
+  } else {
+    next();
+  }
+};
+
 export default {
   validateName,
   validatePath,
@@ -107,5 +131,6 @@ export default {
   validateFile,
   validateNewPath,
   validateDirectoryDoesntExist,
-  requireForce
+  requireForce,
+  validateStorage
 };

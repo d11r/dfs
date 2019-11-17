@@ -4,7 +4,6 @@ import Mongoose from "mongoose";
 
 import Directory from "../models/Directory.model";
 import File from "../models/File.model";
-import Storage from "../models/Storage.model";
 
 const pong = (req, res, next) => {
   res.send("pong");

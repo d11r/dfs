@@ -92,6 +92,10 @@ router.delete(
 router.get("/dir", ClientController.openDirectory);
 
 // routes for storage servers
-router.post("/register", StorageController.register);
+router.post(
+  "/register",
+  [Middleware.validateStorage],
+  StorageController.register
+);
 
 export default router;
