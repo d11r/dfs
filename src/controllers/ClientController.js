@@ -4,6 +4,7 @@ import Mongoose from "mongoose";
 
 import Directory from "../models/Directory.model";
 import File from "../models/File.model";
+import Storage from "../models/Storage.model";
 
 const pong = (req, res, next) => {
   res.send("pong");
@@ -78,9 +79,10 @@ const readFile = (req, res, next) => {
   next();
 };
 
-// TODO: @peter, communicate with vlad how to do it
-const writeFile = (req, res, next) => {
-  res.send("todo: write file");
+const writeFile = async (req, res, next) => {
+  // redirect to one of the storage servers
+  const ss = await Storage.findOne({});
+  res.redirect(307, `http://${ss.ip}:${ss.port}/api/upload`);
   next();
 };
 
