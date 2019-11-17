@@ -73,9 +73,14 @@ const createEmptyFile = async (req, res, next) => {
   next();
 };
 
-// TODO: @peter, communicate with vlad how to do it
-const readFile = (req, res, next) => {
-  res.send("todo: read file");
+const readFile = async (req, res, next) => {
+  const file = await File.findOne({
+    name: req.body.name
+  }).populate({
+    path: "directories",
+    match: { path: req.body.path }
+  });
+
   next();
 };
 

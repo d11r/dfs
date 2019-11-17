@@ -2,6 +2,7 @@
 /* eslint-disable new-cap */
 import Express from "express";
 import bodyParser from "body-parser";
+import cors from "cors";
 
 import { setup, connect } from "./Connections";
 import routes from "./Routes";
@@ -14,6 +15,7 @@ require("dotenv").config();
 
 const app = Express();
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

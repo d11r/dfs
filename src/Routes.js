@@ -12,6 +12,8 @@ router.get("/ping", ClientController.pong);
 // replication
 router.post("/sync", StorageController.sync);
 
+router.post("/replicate", StorageController.replicate);
+
 // initialize
 router.post("/init", ClientController.initialize);
 
@@ -72,7 +74,15 @@ router.post(
   [Middleware.validatePath, Middleware.validateHash],
   ClientController.writeFile
 );
-router.get("/file", ClientController.readFile);
+router.get(
+  "/file",
+  [
+    Middleware.validatePath,
+    Middleware.validateDirectory,
+    Middleware.validateFile
+  ],
+  ClientController.readFile
+);
 
 // routes for directories
 router.get(
