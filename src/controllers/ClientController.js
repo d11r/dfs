@@ -1,3 +1,4 @@
+/* eslint-disable prefer-template */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
 /* eslint-disable eqeqeq */
@@ -81,15 +82,57 @@ const createEmptyFile = async (req, res, next) => {
   next();
 };
 
-const readFile = async (req, res, next) => {
+const readFile = async (req, res) => {
   const file = await File.findOne({
     name: req.body.name
-  }).populate({
-    path: "directories",
-    match: { path: req.body.path }
-  });
+  })
+    .populate({
+      path: "directories",
+      match: { path: req.body.path }
+    })
+    .populate({
+      path: "storages"
+    });
 
-  next();
+  // probe all storage servers related to file
+  for (let i = 0; i < file.storages.length; i += 1) {
+    const storage = file.storages[i];
+    const ip = storage.ip;
+    const port = storage.port;
+
+    try {
+      const response = await axios({
+        method: "get",
+        url: `http://${ip}:${port}/api/ping`,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (response) {
+        console.log("redirected to", `http://${ip}:${port}/api/download`);
+        res.redirect(307, `http://${ip}:${port}/api/download`);
+        return;
+      } else if (i < file.storages.length - 1) {
+        console.log(
+          "could not get file from storage server, retrying on another..."
+        );
+      } else if (i === file.storages.length - 1) {
+        res.status(500);
+        res.send({
+          success: false,
+          message: "failed to download specified file"
+        });
+      }
+    } catch (e) {
+      console.log("error...");
+      res.status(500);
+      res.send({
+        success: false,
+        message: "failed to download specified file\nerror:" + e
+      });
+    }
+  }
 };
 
 const writeFile = async (req, res, next) => {
