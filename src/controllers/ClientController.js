@@ -82,6 +82,42 @@ const createEmptyFile = async (req, res, next) => {
   next();
 };
 
+const probeExcept = async (st, st2, f) => {
+  const others = await Storage.find({ _id: { $nin: [st.id, st2.id] } });
+
+  for (let j = 0; j < others.length; j += 1) {
+    const newStorage = others[j];
+    const newIp = newStorage.ip;
+    const newPort = newStorage.port;
+    const formD = new FormData();
+
+    formD.append(
+      "u_file",
+      fs.createReadStream(path.join(__dirname, "../../uploads", f.name))
+    );
+
+    const axiosArg = {
+      method: "post",
+      url: `http://${newIp}:${newPort}/api/upload`,
+      data: formD,
+      headers: {
+        "Content-Type": `multipart/form-data; boundary=${formD.getBoundary()}`
+      }
+    };
+
+    try {
+      const r = await axios(axiosArg);
+      const newF = await File.findOne({
+        hash: r.data.info.file.hash
+      });
+      newF.storages.push(newStorage.id);
+      await newF.save();
+    } catch (err) {
+      console("replicating from this node did not succeed");
+    }
+  }
+};
+
 const readFile = async (req, res) => {
   const file = await File.findOne({
     name: req.body.name
@@ -110,13 +146,14 @@ const readFile = async (req, res) => {
       });
 
       if (response) {
-        console.log("redirected to", `http://${ip}:${port}/api/download`);
+        console.log(
+          "succeeded, redirected to",
+          `http://${ip}:${port}/api/download`
+        );
         res.redirect(307, `http://${ip}:${port}/api/download`);
         return;
       } else if (i < file.storages.length - 1) {
-        console.log(
-          "could not get file from storage server, retrying on another..."
-        );
+        // TODO: probe
       } else if (i === file.storages.length - 1) {
         res.status(500);
         res.send({
@@ -125,12 +162,12 @@ const readFile = async (req, res) => {
         });
       }
     } catch (e) {
-      console.log("error...");
-      res.status(500);
-      res.send({
-        success: false,
-        message: "failed to download specified file\nerror:" + e
-      });
+      console.log(
+        "failed, executing probe with params",
+        storage,
+        file.storages[i + 1]
+      );
+      await probeExcept(storage, file.storages[i + 1], file);
     }
   }
 };
