@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
 /* eslint-disable eqeqeq */
 import _ from "lodash";
@@ -127,8 +128,10 @@ const writeFile = async (req, res, next) => {
 
     // then, distribute file to storage servers
     const storages = await Storage.find({});
-    let idx = 2; // for failure
-    storages.slice(-2).forEach(storage => {
+
+    let successfulStores = 0;
+    for (let i = 0; i < storages.length; i += 1) {
+      const storage = storages[i];
       const ip = storage.ip;
       const port = storage.port;
 
@@ -140,53 +143,43 @@ const writeFile = async (req, res, next) => {
         )
       );
 
-      axios({
-        method: "post",
-        url: `http://${ip}:${port}/api/upload`,
-        data: fd,
-        headers: {
-          "Content-Type": `multipart/form-data; boundary=${fd.getBoundary()}`
-        }
-      })
-        .then(async response => {
-          const file = await File.findOne({
-            hash: response.data.info.file.hash
-          });
-          if (file) {
-            file.storages.push(storage.id);
-            await file.save();
-          } else {
-            console.log("ERROR!");
-            console.log(
-              "couldnt find file with hash",
-              response.data.info.file.hash
-            );
-            if (storages[idx]) {
-              console.log("trying again with storage", storages[idx], "...");
-              axios({
-                method: "post",
-                url: `http://${storages[idx].ip}:${storages[idx].port}/api/upload`,
-                data: fd,
-                headers: {
-                  "Content-Type": `multipart/form-data; boundary=${fd.getBoundary()}`
-                }
-              })
-                .then(response => {
-                  console.log("successfully recovered file to another ss");
-                  idx += 1;
-                })
-                .catch(response => {
-                  console.log("failed to recover file to another ss");
-                  idx += 1;
-                });
-            }
+      try {
+        const response = await axios({
+          method: "post",
+          url: `http://${ip}:${port}/api/upload`,
+          data: fd,
+          headers: {
+            "Content-Type": `multipart/form-data; boundary=${fd.getBoundary()}`
           }
-        })
-        .catch(response => {
-          console.log("one of storages didnot succeed. here is the message");
-          console.error(response);
         });
-    });
+
+        const file = await File.findOne({
+          hash: response.data.info.file.hash
+        });
+
+        if (file) {
+          file.storages.push(storage.id);
+          await file.save();
+          successfulStores += 1;
+          if (successfulStores === 2) {
+            console.log(
+              "successfully uploaded file to two storages, exiting..."
+            );
+            break;
+          }
+        } else {
+          console.log("ERROR!");
+          console.log(
+            "couldnt find file with hash",
+            response.data.info.file.hash
+          );
+        }
+      } catch (e) {
+        console.log(
+          "one of storages could not store the file, trying with another..."
+        );
+      }
+    }
 
     res.send({
       success: true,
