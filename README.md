@@ -63,3 +63,9 @@ And these on directories:
 ## Additional Requirements
 
 All of these files operations should be replicated on multiple storage servers. DFS will be fault-tolerant, i.e. data will be accessible even if some of the network nodes are offline.
+
+## Team
+
+- Vladislav Smirnov (storage node, client app, deployment)
+- Dragos Strugar (naming node)
+- Peter Zakharkin (storage node, containerization, deployment)
