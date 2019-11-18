@@ -1,10 +1,17 @@
+/* eslint-disable no-console */
 /* eslint-disable eqeqeq */
 import _ from "lodash";
 import Mongoose from "mongoose";
+import path from "path";
+import axios from "axios";
+import FormData from "form-data";
+import fs from "fs";
 
 import Directory from "../models/Directory.model";
 import File from "../models/File.model";
 import Storage from "../models/Storage.model";
+
+import getHash from "../config/getFileHash";
 
 const pong = (req, res, next) => {
   res.send("pong");
@@ -85,7 +92,7 @@ const readFile = async (req, res, next) => {
 };
 
 const writeFile = async (req, res, next) => {
-  // create file
+  // first, save the file to local db
   const directory = await Directory.findOne({ path: req.body.path });
   let newDirectory;
 
@@ -98,15 +105,18 @@ const writeFile = async (req, res, next) => {
   }
 
   const newFile = new File({
-    name: req.body.name,
-    hash: req.body.hash,
+    name: req.file.filename,
     directory: directory ? directory.id : newDirectory.id, // if such directory doesnt exist, create new
-    storages: []
+    storages: [],
+    hash: await getHash(
+      path.join(__dirname, "../../uploads", req.file.filename)
+    )
   });
 
   const savedFile = await newFile.save();
 
   if (savedFile) {
+    // save file also to directory's list of files
     if (directory) {
       directory.files.push(savedFile.id);
       await directory.save();
@@ -114,23 +124,81 @@ const writeFile = async (req, res, next) => {
       newDirectory.files.push(savedFile.id);
       await newDirectory.save();
     }
+
+    // then, distribute file to storage servers
+    const storages = await Storage.find({});
+    let idx = 2; // for failure
+    storages.slice(-2).forEach(storage => {
+      const ip = storage.ip;
+      const port = storage.port;
+
+      const fd = new FormData();
+      fd.append(
+        "u_file",
+        fs.createReadStream(
+          path.join(__dirname, "../../uploads", req.file.filename)
+        )
+      );
+
+      axios({
+        method: "post",
+        url: `http://${ip}:${port}/api/upload`,
+        data: fd,
+        headers: {
+          "Content-Type": `multipart/form-data; boundary=${fd.getBoundary()}`
+        }
+      })
+        .then(async response => {
+          const file = await File.findOne({
+            hash: response.data.info.file.hash
+          });
+          if (file) {
+            file.storages.push(storage.id);
+            await file.save();
+          } else {
+            console.log("ERROR!");
+            console.log(
+              "couldnt find file with hash",
+              response.data.info.file.hash
+            );
+            if (storages[idx]) {
+              console.log("trying again with storage", storages[idx], "...");
+              axios({
+                method: "post",
+                url: `http://${storages[idx].ip}:${storages[idx].port}/api/upload`,
+                data: fd,
+                headers: {
+                  "Content-Type": `multipart/form-data; boundary=${fd.getBoundary()}`
+                }
+              })
+                .then(response => {
+                  console.log("successfully recovered file to another ss");
+                  idx += 1;
+                })
+                .catch(response => {
+                  console.log("failed to recover file to another ss");
+                  idx += 1;
+                });
+            }
+          }
+        })
+        .catch(response => {
+          console.log("one of storages didnot succeed. here is the message");
+          console.error(response);
+        });
+    });
+
     res.send({
       success: true,
-      message: "ok, now send the file using /api/upload"
+      message: "uploaded"
     });
   } else {
+    res.status(500);
     res.send({
       success: false,
       message: "unknown error happened"
     });
   }
-
-  next();
-};
-
-const uploadFile = async (req, res, next) => {
-  const ss = await Storage.findOne({});
-  res.redirect(307, `http://${ss.ip}:${ss.port}/api/upload`);
   next();
 };
 
@@ -247,7 +315,6 @@ const moveFile = async (req, res, next) => {
   next();
 };
 
-// TODO: peter, what do we do here?
 const openDirectory = (req, res, next) => {
   res.send("todo: open directory (cd)");
   next();
@@ -304,7 +371,6 @@ export default {
   initialize,
   createEmptyFile,
   readFile,
-  writeFile,
   deleteFile,
   getFileInfo,
   copyFile,
@@ -313,5 +379,5 @@ export default {
   readDirectory,
   makeDirectory,
   deleteDirectory,
-  uploadFile
+  writeFile
 };

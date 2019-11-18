@@ -136,6 +136,17 @@ const validateStorage = (req, res, next) => {
   }
 };
 
+const validateMulter = (req, res, next) => {
+  if (req.file && req.file.filename) next();
+  else {
+    res.status(400);
+    res.send({
+      success: false,
+      message: "file not specified in form data"
+    });
+  }
+};
+
 export default {
   validateName,
   validatePath,
@@ -145,5 +156,6 @@ export default {
   validateDirectoryDoesntExist,
   requireForce,
   validateStorage,
-  validateHash
+  validateHash,
+  validateMulter
 };

@@ -4,6 +4,8 @@ import ClientController from "./controllers/ClientController";
 import StorageController from "./controllers/StorageController";
 import Middleware from "./controllers/Middleware";
 
+import upload from "./config/multer";
+
 const router = Express.Router();
 
 // ping/pong response from server
@@ -11,8 +13,6 @@ router.get("/ping", ClientController.pong);
 
 // replication
 router.post("/sync", StorageController.sync);
-
-router.post("/replicate", StorageController.replicate);
 
 // initialize
 router.post("/init", ClientController.initialize);
@@ -35,6 +35,7 @@ router.post(
   [Middleware.validateName, Middleware.validatePath],
   ClientController.createEmptyFile
 );
+
 router.post(
   "/filecopy",
   [
@@ -71,9 +72,11 @@ router.delete(
 // files with communication with storage servers
 router.post(
   "/file",
-  [Middleware.validatePath, Middleware.validateHash],
+  upload.single("u_file"),
+  [Middleware.validatePath, Middleware.validateMulter],
   ClientController.writeFile
 );
+
 router.get(
   "/file",
   [
@@ -105,9 +108,6 @@ router.delete(
   ClientController.deleteDirectory
 );
 
-// TODO: peter, related to one in ClientController
-router.get("/dir", ClientController.openDirectory);
-
 // routes for storage servers
 router.post(
   "/register",
@@ -115,6 +115,6 @@ router.post(
   StorageController.register
 );
 
-router.post("/upload", ClientController.uploadFile);
+router.get("/dir", ClientController.openDirectory);
 
 export default router;
